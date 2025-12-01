@@ -30,6 +30,13 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    // Handle validation errors from Vine/Adonis
+    if (error instanceof Object && 'code' in error && error.code === 'E_VALIDATION_ERROR') {
+      return ctx.response.unprocessableEntity({
+        errors: error.messages || error.messages?.errors || error.errors,
+      })
+    }
+    
     return super.handle(error, ctx)
   }
 

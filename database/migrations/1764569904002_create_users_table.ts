@@ -8,8 +8,10 @@ export default class extends BaseSchema {
       table.increments('id').notNullable()
       table.string('full_name').nullable()
       table.string('email', 254).notNullable().unique()
+      table.string('phone').nullable()
       table.string('password').notNullable()
-
+      table.string('invite_code').nullable()
+      table.enum('role', ['admin', 'user']).defaultTo('user').notNullable()
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
     })
