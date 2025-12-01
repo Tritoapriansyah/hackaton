@@ -36,7 +36,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
         errors: error.messages || error.messages?.errors || error.errors,
       })
     }
-    
+
     return super.handle(error, ctx)
   }
 

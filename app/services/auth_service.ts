@@ -7,7 +7,7 @@ export class AuthService {
   async register(payload: Infer<typeof registerValidator>) {
     const user = await User.create({
       ...payload,
-      role: 'user' // Set default role
+      role: 'user', // Set default role
     })
     return user
   }
@@ -17,7 +17,10 @@ export class AuthService {
       const user = await User.verifyCredentials(email, password)
       return user
     } catch (error) {
-      throw new Exception('Invalid credentials', { status: 400 })
+      throw new Exception('Invalid credentials', { 
+        status: 400,
+        exception: 'InvalidCredentials'
+      })
     }
   }
 }

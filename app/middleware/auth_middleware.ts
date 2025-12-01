@@ -19,7 +19,20 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {}
   ) {
-    await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
+    try {
+      await ctx.auth.authenticateUsing(options.guards)
+    } catch (error) {
+      // For API routes, return 401 instead of redirecting
+      const isApiRoute = ctx.request.url().startsWith('/api')
+
+      if (isApiRoute) {
+        return ctx.response.unauthorized({ message: 'Authentication required' })
+      }
+
+      // For web routes, redirect to login
+      return ctx.response.redirect(this.redirectTo)
+    }
+
     return next()
   }
 }
