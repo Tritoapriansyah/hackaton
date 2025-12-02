@@ -7,7 +7,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
  */
 export default class AuthThrottleMiddleware {
   private static readonly requests = new Map<string, { count: number; resetTime: number }>()
-  
+
   // Stricter configuration - 5 attempts per 15 minutes
   private readonly WINDOW_MS = 15 * 60 * 1000 // 15 minutes
   private readonly MAX_REQUESTS = 5
@@ -60,13 +60,13 @@ export default class AuthThrottleMiddleware {
     return Math.ceil((clientData.resetTime - Date.now()) / 1000)
   }
 
-  async handle({ request, response, auth }: HttpContext, next: NextFn) {
+  async handle({ request, response }: HttpContext, next: NextFn) {
     const clientKey = this.getClientKey(request)
 
     // Check if already rate limited
     if (this.isRateLimited(clientKey)) {
       const retryAfter = this.getRetryAfterSeconds(clientKey)
-      
+
       return response.status(429).json({
         message: 'Too many failed authentication attempts. Please try again later.',
         retryAfter,
@@ -76,15 +76,15 @@ export default class AuthThrottleMiddleware {
 
     try {
       const result = await next()
-      
+
       // Clear attempts on successful login
-      const isSuccess = response.response.statusCode === 200 && 
-                       (request.url().includes('/login') || request.url().includes('/register'))
-      
+      const isSuccess = response.response.statusCode === 200 &&
+        (request.url().includes('/login') || request.url().includes('/register'))
+
       if (isSuccess) {
         this.clearAttempts(clientKey)
       }
-      
+
       return result
     } catch (error) {
       // Record failed attempts for auth endpoints

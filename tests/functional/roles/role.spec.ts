@@ -30,12 +30,12 @@ test.group('Role System', (group) => {
     loginResponse.assertStatus(200)
 
     // Extract session cookie
-    const cookies = loginResponse.headers()['set-cookie']
-
+    const raWcookies = loginResponse.headers();
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
     // Make authenticated request
     const response = await client
       .get('/api/roles/current')
-      .header('cookie', cookies?.map(c => c.split(';')[0]).join('; ') || '')
+      .header('cookie', cookies?.map((c: string) => c.split(';')[0]).join('; ') || '')
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -77,12 +77,13 @@ test.group('Role System', (group) => {
     }
 
     loginResponse.assertStatus(200)
-    const cookies = loginResponse.headers()['set-cookie']
+    const raWcookies = loginResponse.headers();
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
     assert.exists(cookies, 'Expected set-cookie header to be present')
 
     const response = await client
       .get('/api/roles/statistics')
-      .header('cookie', cookies?.map(c => c.split(';')[0]).join('; ') || '')
+      .header('cookie', cookies?.map((c: string) => c.split(';')[0]).join('; ') || '')
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -107,12 +108,13 @@ test.group('Role System', (group) => {
       password: 'password123',
     })
     loginResponse.assertStatus(200)
-    const cookies = loginResponse.headers()['set-cookie']
+    const raWcookies = loginResponse.headers();
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
     assert.exists(cookies, 'Expected set-cookie header to be present')
 
     const response = await client
       .get('/api/roles/statistics')
-      .header('cookie', cookies?.map(c => c.split(';')[0]).join('; ') || '')
+      .header('cookie', cookies?.map((c: string) => c.split(';')[0]).join('; ') || '')
 
     response.assertStatus(403)
   })

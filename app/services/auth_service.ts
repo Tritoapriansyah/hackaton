@@ -17,9 +17,9 @@ export class AuthService {
       const user = await User.verifyCredentials(email, password)
       return user
     } catch (error) {
-      throw new Exception('Invalid credentials', { 
+      throw new Exception('Invalid credentials', {
         status: 400,
-        exception: 'InvalidCredentials'
+        code: 'E_INVALID_CREDENTIALS'
       })
     }
   }
