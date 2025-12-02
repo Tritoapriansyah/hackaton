@@ -41,7 +41,7 @@ export default class AuthThrottleMiddleware {
     if (!clientData || now > clientData.resetTime) {
       AuthThrottleMiddleware.requests.set(clientKey, {
         count: 1,
-        resetTime: now + this.WINDOW_MS
+        resetTime: now + this.WINDOW_MS,
       })
       return
     }
@@ -70,7 +70,7 @@ export default class AuthThrottleMiddleware {
       return response.status(429).json({
         message: 'Too many failed authentication attempts. Please try again later.',
         retryAfter,
-        messageForUser: 'Too many failed login attempts. Please wait before trying again.'
+        messageForUser: 'Too many failed login attempts. Please wait before trying again.',
       })
     }
 
@@ -78,7 +78,8 @@ export default class AuthThrottleMiddleware {
       const result = await next()
 
       // Clear attempts on successful login
-      const isSuccess = response.response.statusCode === 200 &&
+      const isSuccess =
+        response.response.statusCode === 200 &&
         (request.url().includes('/login') || request.url().includes('/register'))
 
       if (isSuccess) {

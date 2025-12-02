@@ -19,7 +19,7 @@ export class AuthService {
     } catch (error) {
       throw new Exception('Invalid credentials', {
         status: 400,
-        code: 'E_INVALID_CREDENTIALS'
+        code: 'E_INVALID_CREDENTIALS',
       })
     }
   }

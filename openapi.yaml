@@ -1,0 +1,1027 @@
+openapi: 3.0.3
+info:
+  title: Hackaton API
+  description: Complete API documentation for the Hackaton application including authentication, products, transactions, logs, and dashboard endpoints.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@hackaton.com
+
+servers:
+  - url: http://localhost:3333
+    description: Development server
+  - url: https://api.hackaton.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and registration
+  - name: Products
+    description: Product management and inventory
+  - name: Transactions
+    description: Transaction management and history
+  - name: Logs
+    description: Stock edit logs and system logs
+  - name: Dashboard
+    description: Analytics and statistics
+  - name: Ranking
+    description: User roles and statistics
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [admin, user]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+        description:
+          type: string
+          nullable: true
+        stock:
+          type: integer
+        image:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        productId:
+          type: integer
+        product:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: integer
+        total:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [pending, success, failed]
+        paymentMethod:
+          type: string
+          enum: [cash, credit_card, debit_card, bank_transfer, e_wallet, qris]
+          nullable: true
+        paymentGateway:
+          type: string
+          nullable: true
+        transactionId:
+          type: string
+          nullable: true
+        ipAddress:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Log:
+      type: object
+      properties:
+        id:
+          type: integer
+        message:
+          type: string
+        type:
+          type: string
+          enum: [info, error, warning, success]
+        action:
+          type: string
+          nullable: true
+        productId:
+          type: integer
+          nullable: true
+        userId:
+          type: integer
+          nullable: true
+        oldStock:
+          type: integer
+          nullable: true
+        newStock:
+          type: integer
+          nullable: true
+        metadata:
+          type: string
+          nullable: true
+        product:
+          $ref: '#/components/schemas/Product'
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+
+    PaginatedProducts:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            perPage:
+              type: integer
+            currentPage:
+              type: integer
+            lastPage:
+              type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+
+    PaginatedLogs:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            total:
+              type: integer
+            perPage:
+              type: integer
+            currentPage:
+              type: integer
+            lastPage:
+              type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProducts'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - price
+                - stock
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+                  format: float
+                description:
+                  type: string
+                stock:
+                  type: integer
+                image:
+                  type: string
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+
+    put:
+      tags:
+        - Products
+      summary: Update product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+                description:
+                  type: string
+                stock:
+                  type: integer
+                image:
+                  type: string
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+
+    delete:
+      tags:
+        - Products
+      summary: Delete product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted
+        '404':
+          description: Product not found
+
+  /api/products/{id}/stock:
+    patch:
+      tags:
+        - Products
+      summary: Update product stock
+      description: Updates the stock quantity and creates a log entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - stock
+              properties:
+                stock:
+                  type: integer
+      responses:
+        '200':
+          description: Stock updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+
+  /api/products/import:
+    post:
+      tags:
+        - Products
+      summary: Import products from CSV
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Products imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid file
+
+  /api/products/export:
+    get:
+      tags:
+        - Products
+      summary: Export products to CSV
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /api/logs:
+    get:
+      tags:
+        - Logs
+      summary: Get all logs with filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [info, error, warning, success]
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: product_id
+          in: query
+          schema:
+            type: integer
+        - name: user_id
+          in: query
+          schema:
+            type: integer
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLogs'
+
+  /api/logs/recent:
+    get:
+      tags:
+        - Logs
+      summary: Get recent logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Recent logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Log'
+
+  /api/logs/cleanup:
+    post:
+      tags:
+        - Logs
+      summary: Clean up old logs
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                days:
+                  type: integer
+                  default: 90
+      responses:
+        '200':
+          description: Logs cleaned up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  deleted:
+                    type: integer
+
+  /api/products/{id}/logs:
+    get:
+      tags:
+        - Logs
+      summary: Get logs for a specific product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Product logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLogs'
+
+  /api/products/{id}/stock-history:
+    get:
+      tags:
+        - Logs
+      summary: Get stock change history for a product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Stock history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLogs'
+
+  /api/transactions/my-transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get current user's transactions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+
+  /api/transactions/transaction/{transactionId}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+
+  /api/transactions/statistics:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Transaction statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/transactions/status/{status}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transactions by status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [pending, success, failed]
+      responses:
+        '200':
+          description: Transactions with given status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+
+  /api/transactions/method-distribution:
+    get:
+      tags:
+        - Transactions
+      summary: Get payment method distribution
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payment method distribution
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/ranking/current:
+    get:
+      tags:
+        - Ranking
+      summary: Get current user's role
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user role
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role:
+                    type: string
+
+  /api/ranking/statistics:
+    get:
+      tags:
+        - Ranking
+      summary: Get role statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Role statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/overview:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard overview
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard overview data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: Get general statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: General statistics
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/stock-distribution:
+    get:
+      tags:
+        - Dashboard
+      summary: Get stock distribution
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Stock distribution data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/revenue-timeseries:
+    get:
+      tags:
+        - Dashboard
+      summary: Get revenue time series
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Revenue time series data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/transaction-timeseries:
+    get:
+      tags:
+        - Dashboard
+      summary: Get transaction time series
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Transaction time series data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/transaction-status:
+    get:
+      tags:
+        - Dashboard
+      summary: Get transaction status distribution
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Transaction status distribution
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/payment-methods:
+    get:
+      tags:
+        - Dashboard
+      summary: Get payment methods distribution
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payment methods distribution
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/top-selling-products:
+    get:
+      tags:
+        - Dashboard
+      summary: Get top selling products
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Top selling products
+          content:
+            application/json:
+              schema:
+                type: array
+
+  /api/dashboard/revenue-by-product:
+    get:
+      tags:
+        - Dashboard
+      summary: Get revenue by product
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Revenue by product
+          content:
+            application/json:
+              schema:
+                type: array
+
+  /api/dashboard/top-products:
+    get:
+      tags:
+        - Dashboard
+      summary: Get top products
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Top products
+          content:
+            application/json:
+              schema:
+                type: array
+
+  /api/dashboard/role-distribution:
+    get:
+      tags:
+        - Dashboard
+      summary: Get user role distribution
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Role distribution
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/dashboard/low-stock-alerts:
+    get:
+      tags:
+        - Dashboard
+      summary: Get low stock alerts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Products with low stock
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  components:
+    responses:
+      Unauthorized:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Unauthorized access

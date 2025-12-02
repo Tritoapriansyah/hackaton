@@ -6,7 +6,7 @@ import type { NextFn } from '@adonisjs/core/types/http'
  */
 export default class ThrottleMiddleware {
   private static readonly requests = new Map<string, { count: number; resetTime: number }>()
-  
+
   // Configuration - General API throttling 100 requests per minute
   private readonly WINDOW_MS = 60 * 1000 // 1 minute
   private readonly MAX_REQUESTS = 100
@@ -40,7 +40,7 @@ export default class ThrottleMiddleware {
       // New client
       ThrottleMiddleware.requests.set(clientKey, {
         count: 1,
-        resetTime: now + this.WINDOW_MS
+        resetTime: now + this.WINDOW_MS,
       })
       return
     }
@@ -49,7 +49,7 @@ export default class ThrottleMiddleware {
       // Reset window
       ThrottleMiddleware.requests.set(clientKey, {
         count: 1,
-        resetTime: now + this.WINDOW_MS
+        resetTime: now + this.WINDOW_MS,
       })
       return
     }
@@ -72,7 +72,7 @@ export default class ThrottleMiddleware {
     // Check if already rate limited
     if (this.isRateLimited(clientKey)) {
       const retryAfter = this.getRetryAfterSeconds(clientKey)
-      
+
       return response
         .status(429)
         .header('X-RateLimit-Limit', String(this.MAX_REQUESTS))
@@ -83,7 +83,7 @@ export default class ThrottleMiddleware {
           message: 'Too many requests, please try again later',
           retryAfter,
           limit: this.MAX_REQUESTS,
-          remaining: 0
+          remaining: 0,
         })
     }
 
@@ -93,7 +93,10 @@ export default class ThrottleMiddleware {
     const clientData = ThrottleMiddleware.requests.get(clientKey)
     if (clientData) {
       response.header('X-RateLimit-Limit', String(this.MAX_REQUESTS))
-      response.header('X-RateLimit-Remaining', String(Math.max(0, this.MAX_REQUESTS - clientData.count)))
+      response.header(
+        'X-RateLimit-Remaining',
+        String(Math.max(0, this.MAX_REQUESTS - clientData.count))
+      )
       response.header('X-RateLimit-Reset', String(clientData.resetTime))
     } else {
       response.header('X-RateLimit-Limit', String(this.MAX_REQUESTS))

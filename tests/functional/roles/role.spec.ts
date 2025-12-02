@@ -30,8 +30,8 @@ test.group('Role System', (group) => {
     loginResponse.assertStatus(200)
 
     // Extract session cookie
-    const raWcookies = loginResponse.headers();
-    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
+    const raWcookies = loginResponse.headers()
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined
     // Make authenticated request
     const response = await client
       .get('/api/roles/current')
@@ -40,11 +40,7 @@ test.group('Role System', (group) => {
     response.assertStatus(200)
     response.assertBodyContains({
       role: 'user',
-      permissions: [
-        'users.read',
-        'profile.update',
-        'resources.use',
-      ],
+      permissions: ['users.read', 'profile.update', 'resources.use'],
     })
   })
 
@@ -77,8 +73,8 @@ test.group('Role System', (group) => {
     }
 
     loginResponse.assertStatus(200)
-    const raWcookies = loginResponse.headers();
-    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
+    const raWcookies = loginResponse.headers()
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined
     assert.exists(cookies, 'Expected set-cookie header to be present')
 
     const response = await client
@@ -108,8 +104,8 @@ test.group('Role System', (group) => {
       password: 'password123',
     })
     loginResponse.assertStatus(200)
-    const raWcookies = loginResponse.headers();
-    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined;
+    const raWcookies = loginResponse.headers()
+    const cookies = Array.isArray(raWcookies['set-cookie']) ? raWcookies['set-cookie'] : undefined
     assert.exists(cookies, 'Expected set-cookie header to be present')
 
     const response = await client

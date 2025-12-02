@@ -43,6 +43,7 @@
     "@swc/core": "1.11.24",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.15.18",
+    "@types/swagger-ui-express": "^4.1.8",
     "@vitejs/plugin-vue": "^6.0.2",
     "eslint": "^9.26.0",
     "hot-hook": "^0.4.0",
@@ -71,7 +72,9 @@
     "luxon": "^3.7.2",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
-    "vue": "^3.5.25"
+    "swagger-ui-express": "^5.0.1",
+    "vue": "^3.5.25",
+    "yaml": "^2.8.2"
   },
   "hotHook": {
     "boundaries": [

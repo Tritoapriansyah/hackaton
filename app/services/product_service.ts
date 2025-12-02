@@ -1,8 +1,12 @@
 import Product from '#models/produk'
 import { productValidator } from '#validators/product'
 import { Infer } from '@vinejs/vine/types'
+import { LogService } from './log_service.js'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export class ProductService {
+  constructor(private logService: LogService) {}
   /**
    * Create a new product
    */
@@ -13,10 +17,18 @@ export class ProductService {
   /**
    * Update an existing product
    */
-  async updateProduct(id: number, payload: Infer<typeof productValidator>) {
+  async updateProduct(id: number, payload: Infer<typeof productValidator>, userId?: number) {
     const product = await Product.findOrFail(id)
+    const oldStock = product.stock
+
     product.merge(payload)
     await product.save()
+
+    // Log stock change if stock was updated
+    if (payload.stock !== undefined && oldStock !== payload.stock) {
+      await this.logService.logStockEdit(id, userId || null, oldStock, payload.stock)
+    }
+
     return product
   }
 
@@ -36,8 +48,7 @@ export class ProductService {
 
     if (search) {
       query.where((q) => {
-        q.where('name', 'like', `%${search}%`)
-          .orWhere('description', 'like', `%${search}%`)
+        q.where('name', 'like', `%${search}%`).orWhere('description', 'like', `%${search}%`)
       })
     }
 
@@ -54,10 +65,16 @@ export class ProductService {
   /**
    * Update product stock
    */
-  async updateStock(id: number, stock: number) {
+  async updateStock(id: number, stock: number, userId?: number) {
     const product = await Product.findOrFail(id)
+    const oldStock = product.stock
+
     product.stock = stock
     await product.save()
+
+    // Log the stock change
+    await this.logService.logStockEdit(id, userId || null, oldStock, stock)
+
     return product
   }
 
@@ -70,7 +87,7 @@ export class ProductService {
     const fs = await import('node:fs')
     const content = await fs.promises.readFile(file.tmpPath, 'utf-8')
     const lines = content.split('\n')
-    const headers = lines[0].split(',').map(h => h.trim())
+    const headers = lines[0].split(',').map((h) => h.trim())
 
     const products = []
 
@@ -78,7 +95,7 @@ export class ProductService {
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue
 
-      const values = lines[i].split(',').map(v => v.trim())
+      const values = lines[i].split(',').map((v) => v.trim())
       const productData: any = {}
 
       headers.forEach((header, index) => {
@@ -119,7 +136,7 @@ export class ProductService {
         product.price,
         product.stock,
         `"${(product.description || '').replace(/"/g, '""')}"`,
-        product.createdAt.toFormat('yyyy-MM-dd HH:mm:ss')
+        product.createdAt.toFormat('yyyy-MM-dd HH:mm:ss'),
       ]
       rows.push(row.join(','))
     }

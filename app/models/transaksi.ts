@@ -4,7 +4,13 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
 import Product from '#models/produk'
 
-export type PaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'e_wallet' | 'qris'
+export type PaymentMethod =
+  | 'cash'
+  | 'credit_card'
+  | 'debit_card'
+  | 'bank_transfer'
+  | 'e_wallet'
+  | 'qris'
 
 export default class Transaksi extends BaseModel {
   @column({ isPrimary: true })

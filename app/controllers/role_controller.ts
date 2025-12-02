@@ -24,11 +24,11 @@ export default class RoleController {
    */
   async statistics({ auth, response }: HttpContext) {
     const user = auth.user
-    
+
     if (!user) {
       return response.unauthorized({ message: 'Authentication required' })
     }
-    
+
     if (!user.isAdmin) {
       return response.forbidden({ message: 'Admin permission required' })
     }
