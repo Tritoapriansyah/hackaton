@@ -1,0 +1,21 @@
+{
+  "reporter": ["text", "html", "json-summary"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/build/**",
+    "**/tmp/**",
+    "**/tests/**",
+    "**/*.spec.ts",
+    "**/*.spec.js",
+    "**/bin/**",
+    "**/config/**",
+    "**/database/migrations/**",
+    "**/start/**"
+  ],
+  "include": ["app/**/*.ts"],
+  "check-coverage": true,
+  "lines": 70,
+  "functions": 70,
+  "branches": 70,
+  "statements": 70
+}

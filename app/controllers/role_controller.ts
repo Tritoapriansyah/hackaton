@@ -59,7 +59,15 @@ export default class RoleController {
           'system.manage',
         ]
       case 'user':
-        return ['users.read', 'profile.update', 'resources.use']
+        return [
+          'users.read',
+          'profile.update',
+          'resources.use',
+          'cashbook.create',
+          'cashbook.read',
+          'cashbook.update',
+          'cashbook.delete',
+        ]
       default:
         return []
     }

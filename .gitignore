@@ -23,3 +23,16 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Husky (keep .husky directory but ignore internal files)
+.husky/_/
+
+penilaian.pdf
+QUALITY_CHECKS.md
+ASSESSMENT.md
+FEATURE_CHECKLIST.md
+package-lock.json

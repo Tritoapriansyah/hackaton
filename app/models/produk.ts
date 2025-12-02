@@ -12,6 +12,9 @@ export default class Produk extends BaseModel {
   declare price: number
 
   @column()
+  declare hargaBeli: number
+
+  @column()
   declare description: string | null
 
   @column()
