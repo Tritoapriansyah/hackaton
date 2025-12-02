@@ -89,6 +89,44 @@ Aplikasi manajemen produk, transaksi, dan keuangan untuk UMKM (Usaha Mikro Kecil
 - **Role Statistics**: Statistik distribusi role user
 - **User Management**: Manajemen user dan role
 
+### 🤖 AI/ML Features (Cutting Edge)
+
+- **Sales Prediction**: Prediksi penjualan menggunakan Linear Regression
+- **Product Recommendations**: Rekomendasi produk berbasis ML
+- **Trend Analysis**: Analisis trend penjualan dengan berbagai metrik
+- **Growth Rate Calculation**: Perhitungan growth rate otomatis
+- **Confidence Scoring**: Skor kepercayaan untuk predictions
+
+### 🔔 Real-time Notifications
+
+- **Low Stock Alerts**: Notifikasi otomatis untuk stok rendah
+- **Transaction Notifications**: Notifikasi untuk setiap transaksi
+- **System Notifications**: Notifikasi sistem untuk admin
+- **Unread Count**: Tracking notifikasi yang belum dibaca
+- **Broadcast Notifications**: Broadcast ke semua user (admin only)
+
+### 💾 Redis Caching
+
+- **Performance Optimization**: Caching untuk meningkatkan response time
+- **Cache-aside Pattern**: Implementasi cache-aside pattern
+- **TTL Support**: Time-to-live untuk cache expiration
+- **Pattern-based Deletion**: Hapus cache berdasarkan pattern
+
+### 📊 Advanced Monitoring
+
+- **System Health**: Monitoring kesehatan sistem
+- **Performance Metrics**: Tracking response time dan error rate
+- **Slow Endpoints**: Identifikasi endpoint yang lambat
+- **Memory Monitoring**: Tracking penggunaan memory
+- **Database & Cache Status**: Monitoring koneksi database dan cache
+
+### 🚀 CI/CD Pipeline
+
+- **Automated Testing**: Testing otomatis pada setiap push/PR
+- **Docker Build**: Automated Docker image building
+- **Coverage Reporting**: Test coverage reporting
+- **Automated Deployment**: Deployment otomatis untuk main branch
+
 ---
 
 ## 🛠 Teknologi yang Digunakan
@@ -119,6 +157,9 @@ Aplikasi manajemen produk, transaksi, dan keuangan untuk UMKM (Usaha Mikro Kecil
 - **Swagger/OpenAPI**: API documentation
 - **ESLint & Prettier**: Code quality
 - **Japa**: Testing framework
+- **ml-regression**: Machine learning untuk sales prediction
+- **simple-statistics**: Statistical analysis
+- **GitHub Actions**: CI/CD pipeline
 
 ---
 
@@ -429,6 +470,26 @@ Aplikasi menyediakan Swagger UI untuk dokumentasi API interaktif:
 
 - `GET /api/hpp/calculate` - Calculate HPP
 - `GET /api/hpp/product/:productId` - HPP per produk
+
+#### AI/ML (Cutting Edge)
+
+- `GET /api/ai/predict-sales` - Sales prediction dengan ML
+- `GET /api/ai/recommendations` - Product recommendations
+- `GET /api/ai/trends` - Trend analysis
+
+#### Notifications (Real-time)
+
+- `GET /api/notifications` - Get user notifications
+- `GET /api/notifications/unread-count` - Get unread count
+- `PATCH /api/notifications/:id/read` - Mark as read
+- `PATCH /api/notifications/read-all` - Mark all as read
+- `DELETE /api/notifications/:id` - Delete notification
+
+#### Monitoring (Observability)
+
+- `GET /api/monitoring/health` - System health check
+- `GET /api/monitoring/metrics` - Performance metrics
+- `GET /api/monitoring/slow-endpoints` - Top slow endpoints
 
 #### Dashboard
 

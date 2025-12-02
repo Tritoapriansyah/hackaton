@@ -12,6 +12,9 @@ const CashBooksController = () => import('#controllers/cash_books_controller')
 const OperasionalsController = () => import('#controllers/operasionals_controller')
 const RekapsController = () => import('#controllers/rekaps_controller')
 const HppsController = () => import('#controllers/hpps_controller')
+const AIController = () => import('#controllers/ai_controller')
+const NotificationsController = () => import('#controllers/notifications_controller')
+const MonitoringController = () => import('#controllers/monitoring_controller')
 
 /**
  * API Documentation routes
@@ -165,4 +168,42 @@ router
     router.get('/product/:productId', [HppsController, 'byProduct'])
   })
   .prefix('api/hpp')
+  .use(middleware.auth())
+
+/**
+ * AI/ML routes (Cutting Edge Features)
+ */
+router
+  .group(() => {
+    router.get('/predict-sales', [AIController, 'predictSales'])
+    router.get('/recommendations', [AIController, 'recommendations'])
+    router.get('/trends', [AIController, 'trends'])
+  })
+  .prefix('api/ai')
+  .use(middleware.auth())
+
+/**
+ * Notifications routes (Real-time Notifications)
+ */
+router
+  .group(() => {
+    router.get('/', [NotificationsController, 'index'])
+    router.get('/unread-count', [NotificationsController, 'unreadCount'])
+    router.patch('/:id/read', [NotificationsController, 'markAsRead'])
+    router.patch('/read-all', [NotificationsController, 'markAllAsRead'])
+    router.delete('/:id', [NotificationsController, 'destroy'])
+  })
+  .prefix('api/notifications')
+  .use(middleware.auth())
+
+/**
+ * Monitoring routes (System Monitoring & Observability)
+ */
+router
+  .group(() => {
+    router.get('/health', [MonitoringController, 'health'])
+    router.get('/metrics', [MonitoringController, 'metrics'])
+    router.get('/slow-endpoints', [MonitoringController, 'slowEndpoints'])
+  })
+  .prefix('api/monitoring')
   .use(middleware.auth())

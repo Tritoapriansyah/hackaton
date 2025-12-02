@@ -23,6 +23,7 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+Thumbs.db
 
 # Coverage reports
 coverage/
@@ -31,8 +32,39 @@ coverage/
 # Husky (keep .husky directory but ignore internal files)
 .husky/_/
 
+# Assessment and internal documentation (not needed in repo)
 penilaian.pdf
 QUALITY_CHECKS.md
 ASSESSMENT.md
+ASSESSMENT_UPDATED.md
 FEATURE_CHECKLIST.md
+
+# Troubleshooting guides (temporary files)
+LOCKFILE_FIX.md
+ESBUILD_FIX.md
+
+# Package manager files (use npm/yarn/pnpm as needed)
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
